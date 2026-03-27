@@ -32,7 +32,7 @@
   "name": "AWS STS",
   "uuid": "1490ee64-8a9a-4961-87c6-621f8cd67546",
   "slug": "aws-sts",
-  "version": "1.35.0",
+  "version": "1.35.1",
   "categories": [
     "Cloud Providers"
   ],
