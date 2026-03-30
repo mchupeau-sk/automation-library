@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 import boto3
 import requests
 from aws_helpers.client import AwsClientConfiguration
-
+from loguru import logger
 from .base import AwsModule
 
 
@@ -105,6 +105,7 @@ class OidcAwsMixin:
                 aws_region=self.module.configuration.aws_region_name,
                 aws_session_token=credentials["SessionToken"],
             )
+            logger.info(f"New token obtained via OIDC")
             return self._cached_aws_config
         except Exception as e:
             raise RuntimeError(f"Could not assume role: {str(e)}") from e
