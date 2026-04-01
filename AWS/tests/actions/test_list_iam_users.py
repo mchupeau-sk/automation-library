@@ -144,18 +144,17 @@ def test_list_iam_users_empty(module_with_keys, symphony_storage):
 
 
 def test_list_iam_users_role_arn(module_with_role, symphony_storage):
-    """When aws_role_arn is set, assumes the role via STS before listing users."""
+    """When aws_role_arn is set, uses OIDC role assumption via get_assume_role()."""
+    from aws_helpers.client import AwsClientConfiguration
+
     action = _make_action(module_with_role, symphony_storage)
 
-    sts_response = {
-        "Credentials": {
-            "AccessKeyId": "tempAccessKey",
-            "SecretAccessKey": "tempSecretKey",
-            "SessionToken": "tempToken",
-        }
-    }
-    mock_sts_client = mock.MagicMock()
-    mock_sts_client.assume_role.return_value = sts_response
+    fake_aws_config = AwsClientConfiguration(
+        aws_access_key_id="tempAccessKey",
+        aws_secret_access_key="tempSecretKey",
+        aws_region="eu-west-1",
+        aws_session_token="tempToken",
+    )
 
     mock_iam = mock.MagicMock()
     mock_paginator = mock.MagicMock()
@@ -165,20 +164,11 @@ def test_list_iam_users_role_arn(module_with_role, symphony_storage):
     mock_role_session = mock.MagicMock()
     mock_role_session.client.return_value = mock_iam
 
-    with mock.patch("actions.list_iam_users.boto3.client", return_value=mock_sts_client) as mock_boto_client, \
+    with mock.patch.object(action, "get_assume_role", return_value=fake_aws_config) as mock_assume_role, \
          mock.patch("actions.list_iam_users.boto3.Session", return_value=mock_role_session) as mock_boto_session:
         result = action.run({})
 
-    mock_boto_client.assert_called_once_with(
-        "sts",
-        aws_access_key_id="fakeAccessKey",
-        aws_secret_access_key="fakeSecretKey",
-        region_name="eu-west-1",
-    )
-    mock_sts_client.assume_role.assert_called_once_with(
-        RoleArn="arn:aws:iam::123456789012:role/FakeRole",
-        RoleSessionName="sekoia-list-iam-users",
-    )
+    mock_assume_role.assert_called_once()
     mock_boto_session.assert_called_once_with(
         aws_access_key_id="tempAccessKey",
         aws_secret_access_key="tempSecretKey",

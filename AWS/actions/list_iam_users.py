@@ -2,38 +2,28 @@
 from typing import Any
 
 import boto3
-from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 from sekoia_automation.action import Action
 
 from aws_helpers.base import AwsModule
+from aws_helpers.oidc import OidcAwsMixin
 
 
-class ListIamUsers(Action):
+class ListIamUsers(OidcAwsMixin, Action):
     """List all IAM users in the AWS tenant."""
 
     module: AwsModule
 
     def _get_iam_client(self) -> boto3.client:
-        """Return a boto3 IAM client, optionally assuming a role via STS."""
+        """Return a boto3 IAM client, using OIDC role assumption when configured."""
         config = self.module.configuration
 
         if config.aws_role_arn:
-            sts_kwargs: dict[str, Any] = {"region_name": config.aws_region_name}
-            if config.aws_access_key and config.aws_secret_access_key:
-                sts_kwargs["aws_access_key_id"] = config.aws_access_key
-                sts_kwargs["aws_secret_access_key"] = config.aws_secret_access_key
-
-            sts_client = boto3.client("sts", **sts_kwargs)
-            response = sts_client.assume_role(
-                RoleArn=config.aws_role_arn,
-                RoleSessionName="sekoia-list-iam-users",
-            )
-            creds = response["Credentials"]
+            aws_config = self.get_assume_role()
             session = boto3.Session(
-                aws_access_key_id=creds["AccessKeyId"],
-                aws_secret_access_key=creds["SecretAccessKey"],
-                aws_session_token=creds["SessionToken"],
-                region_name=config.aws_region_name,
+                aws_access_key_id=aws_config.aws_access_key_id,
+                aws_secret_access_key=aws_config.aws_secret_access_key,
+                aws_session_token=aws_config.aws_session_token,
+                region_name=aws_config.aws_region,
             )
         else:
             session = boto3.Session(
@@ -47,14 +37,7 @@ class ListIamUsers(Action):
     def run(self, arguments: dict) -> dict[str, Any]:
         path_prefix = arguments.get("path_prefix", "/")
 
-        try:
-            iam = self._get_iam_client()
-        except NoCredentialsError as e:
-            self.log("AWS credentials not found or invalid", level="error")
-            raise
-        except (BotoCoreError, ClientError) as e:
-            self.log(f"Failed to create IAM client: {e}", level="error")
-            raise
+        iam = self._get_iam_client()
 
         users: list[dict[str, Any]] = []
         paginator = iam.get_paginator("list_users")
