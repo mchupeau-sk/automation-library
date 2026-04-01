@@ -2,6 +2,7 @@
 
 from sekoia_automation.loguru.config import init_logging
 
+from actions.list_iam_users import ListIamUsers
 from asset_connector.device_assets import AwsDeviceAssetConnector
 from asset_connector.users_assets import AwsUsersAssetConnector
 from aws_helpers.account_validator import AwsAccountValidator
@@ -21,6 +22,7 @@ if __name__ == "__main__":
 
     module = AwsModule()
     module.register_account_validator(AwsAccountValidator)
+    module.register(ListIamUsers, "aws_list_iam_users")
     module.register(AwsDeviceAssetConnector, "aws_device_asset_connector")
     module.register(AwsUsersAssetConnector, "aws_users_asset_connector")
     module.register(CloudTrailLogsTrigger, "cloudtrail_logs_trigger")

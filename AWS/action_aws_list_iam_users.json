@@ -1,0 +1,45 @@
+{
+  "uuid": "1137fc3c-f3b0-47ab-b72e-cea038cf4ac9",
+  "name": "List IAM Users",
+  "description": "List all IAM users in the AWS tenant, with optional filtering by path prefix.",
+  "docker_parameters": "aws_list_iam_users",
+  "slug": "list_iam_users",
+  "arguments": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "Arguments",
+    "properties": {
+      "path_prefix": {
+        "description": "The path prefix to filter users by (e.g. '/division_abc/subdivision_xyz/'). Defaults to '/' to return all users.",
+        "type": "string",
+        "default": "/"
+      }
+    }
+  },
+  "results": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "Results",
+    "properties": {
+      "users": {
+        "description": "List of IAM users in the AWS tenant.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "user_id": { "type": "string", "description": "The stable and unique string identifying the user." },
+            "user_name": { "type": "string", "description": "The friendly name identifying the user." },
+            "arn": { "type": "string", "description": "The Amazon Resource Name (ARN) that identifies the user." },
+            "path": { "type": "string", "description": "The path to the user." },
+            "create_date": { "type": "string", "description": "The date and time when the user was created (ISO 8601)." },
+            "password_last_used": { "type": "string", "description": "The date and time when the user's password was last used to sign in (ISO 8601)." }
+          }
+        }
+      },
+      "count": {
+        "description": "Total number of IAM users returned.",
+        "type": "integer"
+      }
+    }
+  }
+}
