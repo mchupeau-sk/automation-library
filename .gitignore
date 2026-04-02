@@ -82,3 +82,4 @@ dmypy.json
 MicrosoftActiveDirectory/test_end_to_end_action.py
 AWS/test_end_to_end_cloudfront.py
 */.github/*
+*/test_end_to_end_*
