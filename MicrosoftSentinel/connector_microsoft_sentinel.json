@@ -1,7 +1,7 @@
 {
   "description": "Forward Microsoft Sentinel Alerts to Sekoia",
   "docker_parameters": "get_microsoft_sentinel_alerts",
-  "name": "Get Microsoft Sentinel alerts",
+  "name": "Get Microsoft Sentinel alerts - TEST",
   "arguments": {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "properties": {
@@ -32,5 +32,5 @@
     "title": "Microsoft Sentinel Alerts",
     "type": "object"
   },
-  "uuid": "7537aa6a-7411-4feb-a6c8-f02d55077db9"
+  "uuid": "75a684a6-3e2e-4714-b2ea-2f65b7e5eb88"
 }
